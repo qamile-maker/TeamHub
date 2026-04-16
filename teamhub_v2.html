@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Hub</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;font-size:14px;background:#f0f2f8;color:#1a1a1a;min-height:100vh}
+input,select,textarea{font-family:inherit;font-size:14px;border:1px solid #d0d0d0;border-radius:6px;padding:8px 10px;width:100%;outline:none;background:#fff;color:#1a1a1a}
+input:focus,select:focus,textarea:focus{border-color:#4a6cf7;box-shadow:0 0 0 2px rgba(74,108,247,.12)}
+button{font-family:inherit;font-size:13px;border-radius:6px;padding:7px 14px;cursor:pointer;border:1px solid #d0d0d0;background:#fff;color:#1a1a1a}
+button:hover{background:#f0f0f0}
+button.primary{background:#4a6cf7;color:#fff;border-color:#4a6cf7}
+button.primary:hover{background:#3a5ce7}
+button.danger{color:#d93025;border-color:#d93025;background:#fff}
+button.danger:hover{background:#fdf0ef}
+button.sm{padding:4px 10px;font-size:12px}
+.hide{display:none}
+
+/* Login */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:#fff;border-radius:16px;padding:40px;width:360px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.login-box h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.login-box p{color:#666;font-size:13px;margin-bottom:24px}
+.login-box label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;margin-top:14px;color:#444}
+.login-box button{width:100%;margin-top:20px;padding:11px;font-size:14px}
+.err{color:#d93025;font-size:12px;margin-top:8px;display:none}
+
+/* App shell */
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.show{display:flex}
+.topbar{background:linear-gradient(135deg,#4a6cf7,#7b5cf0);padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(74,108,247,.3)}
+.topbar .logo{font-weight:700;font-size:16px;color:#fff;flex:1;letter-spacing:-.3px}
+.topbar .logo span{opacity:.7;font-weight:400;font-size:13px;margin-left:8px}
+.user-pill{font-size:12px;background:rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:4px 14px;font-weight:500}
+.topbar button{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:12px;padding:5px 12px;border-radius:20px}
+.topbar button:hover{background:rgba(255,255,255,.15)}
+
+.sidenav{width:200px;min-width:200px;background:#fff;border-right:1px solid #e0e0e0;padding:16px 0;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;font-weight:500;color:#555;cursor:pointer;border-radius:0;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{background:#f5f6ff;color:#4a6cf7}
+.nav-item.active{background:#eef0ff;color:#4a6cf7;border-left-color:#4a6cf7}
+.nav-item .icon{width:18px;text-align:center;font-size:14px}
+.nav-divider{height:1px;background:#f0f0f0;margin:8px 12px}
+.nav-label{font-size:11px;font-weight:600;color:#aaa;padding:8px 16px 4px;text-transform:uppercase;letter-spacing:.5px}
+
+.body-wrap{display:flex;flex:1;overflow:hidden}
+.main{flex:1;overflow-y:auto;padding:24px}
+
+.section{display:none}
+.section.active{display:block}
+
+/* Page header */
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.page-header h2{font-size:18px;font-weight:700;flex:1}
+.page-header .subtitle{font-size:13px;color:#888}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:#fff;border-radius:12px;padding:16px;text-align:center;border:1px solid #e8e8e8}
+.stat .n{font-size:28px;font-weight:700;color:#4a6cf7;line-height:1}
+.stat .l{font-size:11px;color:#999;margin-top:4px}
+.stat.warn .n{color:#e65100}
+.stat.ok .n{color:#1e8e3e}
+
+/* Member toggle */
+.member-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+.member-row span{font-size:12px;color:#999}
+.mbtn{padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;border:1.5px solid #d0d0d0;background:#fff;color:#666;cursor:pointer}
+.mbtn:hover{border-color:#4a6cf7;color:#4a6cf7}
+.mbtn.active{background:#4a6cf7;color:#fff;border-color:#4a6cf7}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.toolbar input{max-width:240px}
+.toolbar select{max-width:170px}
+.spacer{flex:1}
+
+/* Cards grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:16px;cursor:pointer;transition:all .15s;position:relative}
+.card:hover{border-color:#4a6cf7;box-shadow:0 2px 12px rgba(74,108,247,.1)}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.avatar{width:40px;height:40px;min-width:40px;border-radius:10px;background:#eef0ff;color:#4a6cf7;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.card-title{font-weight:600;font-size:14px;line-height:1.3}
+.card-sub{font-size:12px;color:#888;margin-top:2px}
+.card-footer{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5}
+
+/* Stage badges */
+.stage{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.stage-identified{background:#e8f0fe;color:#1a73e8}
+.stage-approached{background:#e8f5e9;color:#2e7d32}
+.stage-in-conversation{background:#fff3e0;color:#e65100}
+.stage-committed{background:#e8f5e9;color:#1b5e20}
+.stage-stalled{background:#fce8fd;color:#9334e6}
+.stage-closed{background:#f5f5f5;color:#666}
+.stage-qualifying{background:#e3f2fd;color:#1565c0}
+.stage-proposal-sent{background:#fff8e1;color:#f57f17}
+.stage-negotiating{background:#fce4ec;color:#c62828}
+.stage-won{background:#e8f5e9;color:#1b5e20}
+.stage-lost{background:#ffebee;color:#b71c1c}
+.stage-backlog{background:#f5f5f5;color:#666}
+.stage-planned{background:#e3f2fd;color:#1565c0}
+.stage-in-progress{background:#fff3e0;color:#e65100}
+.stage-done{background:#e8f5e9;color:#1b5e20}
+.stage-ongoing{background:#e8f0fe;color:#1a73e8}
+
+.assigned-pill{background:#f5f5f5;color:#555;border-radius:10px;padding:2px 8px;font-size:11px}
+.type-pill{background:#f0f2ff;color:#4a6cf7;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:500}
+
+/* Detail panel */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:flex-start;justify-content:flex-end}
+.overlay.open{display:flex}
+.panel{background:#fff;width:540px;max-width:100vw;height:100vh;overflow-y:auto;padding:28px;box-shadow:-4px 0 32px rgba(0,0,0,.12)}
+.panel-close{float:right;background:none;border:none;font-size:20px;color:#aaa;cursor:pointer}
+.panel h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.panel .psub{font-size:13px;color:#888;margin-bottom:20px}
+.panel-actions{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.info-grid{display:grid;grid-template-columns:100px 1fr;gap:6px 12px;font-size:13px;margin-bottom:20px}
+.info-grid .lbl{color:#999;font-weight:500}
+.info-grid .val{color:#222}
+.notes-box{background:#f9f9f9;border-radius:8px;padding:12px;font-size:13px;color:#444;white-space:pre-wrap;line-height:1.6;margin-bottom:20px}
+.activity-item{background:#f9f9f9;border-radius:8px;padding:12px;margin-bottom:10px;border:1px solid #ebebeb}
+.act-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.act-subject{font-weight:600;font-size:13px;flex:1}
+.act-footer{font-size:11px;color:#999;margin-top:6px;display:flex;gap:10px;align-items:center}
+.act-actions{margin-left:auto;display:flex;gap:6px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px;width:520px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:20px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.frow{margin-bottom:14px}
+.frow label{display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:4px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Feed items */
+.feed-item{background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:14px;margin-bottom:10px}
+.feed-header{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.contact-link{color:#4a6cf7;cursor:pointer;font-size:12px}
+.contact-link:hover{text-decoration:underline}
+
+/* Links tab */
+.link-card{background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:14px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+.link-icon{width:36px;height:36px;min-width:36px;border-radius:8px;background:#eef0ff;color:#4a6cf7;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.link-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.link-url{font-size:12px;color:#4a6cf7;text-decoration:none;word-break:break-all}
+.link-url:hover{text-decoration:underline}
+.link-notes{font-size:13px;color:#666;margin-top:5px}
+.link-meta{font-size:11px;color:#aaa;margin-top:5px}
+
+/* Dashboard feed */
+.dash-feed-item{background:#fff;border-radius:10px;border:1px solid #e8e8e8;padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start}
+.dash-feed-dot{width:10px;height:10px;min-width:10px;border-radius:50%;margin-top:4px}
+.dot-stalled{background:#9334e6}
+.dot-new{background:#e65100}
+.dot-progress{background:#1a73e8}
+.dot-done{background:#1e8e3e}
+.dot-default{background:#aaa}
+
+/* Stalled alert */
+.stalled-alert{background:#fef9ff;border:1px solid #e8d5f5;border-radius:10px;padding:14px 16px;margin-bottom:16px}
+.stalled-alert h4{font-size:13px;font-weight:600;color:#7b2d9e;margin-bottom:8px}
+.stalled-item{font-size:13px;color:#555;padding:4px 0;border-bottom:1px solid #f5edf9;display:flex;gap:8px;align-items:center}
+.stalled-item:last-child{border-bottom:none}
+
+/* Empty */
+.empty{text-align:center;padding:48px 20px;color:#bbb;grid-column:1/-1}
+.empty .big{font-size:36px;margin-bottom:8px}
+
+/* Responsive */
+@media(max-width:700px){
+  .sidenav{display:none}
+  .fgrid{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .panel{width:100vw}
+  .toolbar input,.toolbar select{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-box">
+    <h1>Team Hub</h1>
+    <p>Your team's 360 workspace</p>
+    <label>Username</label>
+    <input type="text" id="lu" placeholder="username" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="lp" placeholder="password" autocomplete="current-password">
+    <div class="err" id="lerr">Incorrect username or password.</div>
+    <button class="primary" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <span class="logo">Team Hub <span>360 workspace</span></span>
+    <span class="user-pill" id="user-display"></span>
+    <button onclick="doLogout()">Sign out</button>
+  </div>
+  <div class="body-wrap">
+    <div class="sidenav" id="sidenav">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+        <span class="icon">&#9632;</span>Dashboard
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-label">Networking</div>
+      <div class="nav-item" onclick="showSection('investors')" id="nav-investors">
+        <span class="icon">&#9670;</span>Investors
+      </div>
+      <div class="nav-item" onclick="showSection('partners')" id="nav-partners">
+        <span class="icon">&#9670;</span>Partners
+      </div>
+      <div class="nav-item" onclick="showSection('customers')" id="nav-customers">
+        <span class="icon">&#9670;</span>Potential customers
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-label">Business</div>
+      <div class="nav-item" onclick="showSection('opportunities')" id="nav-opportunities">
+        <span class="icon">&#9654;</span>Opportunities
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-label">Product</div>
+      <div class="nav-item" onclick="showSection('product')" id="nav-product">
+        <span class="icon">&#9675;</span>Dev ideas
+      </div>
+      <div class="nav-item" onclick="showSection('inprogress')" id="nav-inprogress">
+        <span class="icon">&#9675;</span>In progress
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-label">Resources</div>
+      <div class="nav-item" onclick="showSection('industry')" id="nav-industry">
+        <span class="icon">&#9632;</span>Industry data
+      </div>
+      <div class="nav-item" onclick="showSection('links')" id="nav-links">
+        <span class="icon">&#9632;</span>Shared links
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-label">People</div>
+      <div class="nav-item" onclick="showSection('contacts')" id="nav-contacts">
+        <span class="icon">&#9632;</span>Contacts
+      </div>
+      <div class="nav-item" onclick="showSection('feed')" id="nav-feed">
+        <span class="icon">&#9632;</span>Activity feed
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="section active" id="section-dashboard">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+        </div>
+        <div class="member-row" id="member-row">
+          <span>Viewing:</span>
+        </div>
+        <div id="stalled-alerts"></div>
+        <div class="stats-row" id="dash-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dash-columns">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#444;margin-bottom:10px" id="dash-label">My recent activity</div>
+            <div id="dash-feed"></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#444;margin-bottom:10px">Stalled items</div>
+            <div id="dash-stalled"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NETWORKING SECTIONS (investors, partners, customers) -->
+      <div class="section" id="section-investors"></div>
+      <div class="section" id="section-partners"></div>
+      <div class="section" id="section-customers"></div>
+      <div class="section" id="section-opportunities"></div>
+      <div class="section" id="section-product"></div>
+      <div class="section" id="section-inprogress"></div>
+      <div class="section" id="section-industry"></div>
+
+      <!-- SHARED LINKS -->
+      <div class="section" id="section-links">
+        <div class="page-header">
+          <h2>Shared links</h2>
+          <button class="primary" onclick="openLinkModal()">+ Add link</button>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="link-search" placeholder="Search links..." oninput="renderLinks()">
+          <select id="link-cat-filter" onchange="renderLinks()">
+            <option value="">All categories</option>
+            <option>Article</option><option>Tool</option><option>Report</option>
+            <option>Video</option><option>Other</option>
+          </select>
+        </div>
+        <div id="links-list"></div>
+      </div>
+
+      <!-- CONTACTS -->
+      <div class="section" id="section-contacts">
+        <div class="page-header">
+          <h2>Contacts</h2>
+          <button class="primary" onclick="openRecordModal('contact')">+ Add contact</button>
+        </div>
+        <div class="toolbar">
+          <input type="text" id="contact-search" placeholder="Search contacts..." oninput="renderContacts()">
+          <select id="contact-assigned" onchange="renderContacts()">
+            <option value="">All team members</option>
+          </select>
+        </div>
+        <div class="grid" id="contacts-grid"></div>
+      </div>
+
+      <!-- ACTIVITY FEED -->
+      <div class="section" id="section-feed">
+        <div class="page-header">
+          <h2>Activity feed</h2>
+          <button class="primary" onclick="openActivityModal(null,null,null)">+ Log activity</button>
+        </div>
+        <div class="toolbar">
+          <select id="feed-type" onchange="renderFeed()">
+            <option value="">All types</option>
+            <option value="email">Email</option><option value="call">Call</option>
+            <option value="note">Note</option><option value="meeting">Meeting</option><option value="task">Task</option>
+          </select>
+          <select id="feed-status" onchange="renderFeed()">
+            <option value="">All statuses</option>
+            <option value="new">New</option><option value="progress">In progress</option><option value="done">Done</option>
+          </select>
+          <select id="feed-assigned" onchange="renderFeed()">
+            <option value="">All team members</option>
+          </select>
+        </div>
+        <div id="feed-list"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="overlay" id="detail-overlay" onclick="maybeCloseOverlay(event,'detail-overlay')">
+  <div class="panel">
+    <button class="panel-close" onclick="closePanel()">&#10005;</button>
+    <div id="panel-content"></div>
+  </div>
+</div>
+
+<!-- RECORD MODAL -->
+<div class="modal-overlay" id="record-modal">
+  <div class="modal">
+    <h3 id="rm-title">Add record</h3>
+    <input type="hidden" id="rm-id">
+    <input type="hidden" id="rm-type">
+    <div class="fgrid">
+      <div class="frow"><label>Title / Name *</label><input id="rm-name" placeholder="Name or title"></div>
+      <div class="frow"><label id="rm-sub-label">Company / Organisation</label><input id="rm-sub" placeholder=""></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label>Email</label><input id="rm-email" type="email" placeholder="email@example.com"></div>
+      <div class="frow"><label>Phone</label><input id="rm-phone" placeholder="+44 ..."></div>
+    </div>
+    <div class="frow" id="rm-address-row"><label>Address</label><input id="rm-address" placeholder="Street, city, postcode"></div>
+    <div class="frow"><label>Stage</label><select id="rm-stage"></select></div>
+    <div class="frow"><label>Assigned to</label><select id="rm-assigned"></select></div>
+    <div class="frow"><label>Value / Size</label><input id="rm-value" placeholder="e.g. £50k, Series A, 200 users..."></div>
+    <div class="frow"><label>Notes</label><textarea id="rm-notes" rows="3" placeholder="Key context, background, next steps..."></textarea></div>
+    <div class="modal-actions">
+      <button onclick="closeRecordModal()">Cancel</button>
+      <button class="primary" onclick="saveRecord()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY MODAL -->
+<div class="modal-overlay" id="activity-modal">
+  <div class="modal">
+    <h3 id="am-title">Log activity</h3>
+    <input type="hidden" id="am-id">
+    <input type="hidden" id="am-record-type">
+    <div class="fgrid">
+      <div class="frow"><label>Type</label>
+        <select id="am-type">
+          <option value="email">Email</option><option value="call">Phone call</option>
+          <option value="note">Note</option><option value="meeting">Meeting</option><option value="task">Task</option>
+        </select>
+      </div>
+      <div class="frow"><label>Status</label>
+        <select id="am-status">
+          <option value="new">New</option><option value="progress">In progress</option><option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow"><label>Linked to</label><select id="am-record"></select></div>
+    <div class="frow"><label>Subject *</label><input id="am-subject" placeholder="Brief subject line"></div>
+    <div class="frow"><label>Details</label><textarea id="am-body" rows="3" placeholder="Full details..."></textarea></div>
+    <div class="frow"><label>Progress / next step</label><input id="am-progress" placeholder="e.g. Follow up Friday, Awaiting reply..."></div>
+    <div class="frow"><label>Assigned to</label><select id="am-assigned"></select></div>
+    <div class="modal-actions">
+      <button onclick="closeActivityModal()">Cancel</button>
+      <button class="primary" onclick="saveActivity()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LINK MODAL -->
+<div class="modal-overlay" id="link-modal">
+  <div class="modal">
+    <h3 id="lm-title">Add shared link</h3>
+    <input type="hidden" id="lm-id">
+    <div class="frow"><label>URL *</label><input id="lm-url" placeholder="https://..."></div>
+    <div class="frow"><label>Title *</label><input id="lm-title-field" placeholder="Descriptive title"></div>
+    <div class="frow"><label>Category</label>
+      <select id="lm-cat">
+        <option value="Article">Article</option><option value="Tool">Tool</option>
+        <option value="Report">Report</option><option value="Video">Video</option><option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="frow"><label>Notes</label><textarea id="lm-notes" rows="3" placeholder="Why is this useful? What's it about?"></textarea></div>
+    <div class="modal-actions">
+      <button onclick="closeLinkModal()">Cancel</button>
+      <button class="primary" onclick="saveLink()">Save link</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL_KEY = 'teamhub_v2_script_url';
+let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_KEY) || '';
+let currentUser = null;
+let dashUser = null;
+let records = {};
+let activities = [];
+let links = [];
+let users = [];
+let openRecordId = null;
+let openRecordType = null;
+
+const SECTIONS = {
+  investors:    {label:'Investors',        icon:'&#9670;', stages:['identified','approached','in-conversation','committed','stalled','closed'], color:'#1a73e8'},
+  partners:     {label:'Partners',         icon:'&#9670;', stages:['identified','approached','in-conversation','committed','stalled','closed'], color:'#0f9d58'},
+  customers:    {label:'Potential customers', icon:'&#9670;', stages:['identified','approached','in-conversation','committed','stalled','closed'], color:'#f4b400'},
+  opportunities:{label:'Opportunities',    icon:'&#9654;', stages:['identified','qualifying','proposal-sent','negotiating','won','lost','stalled'], color:'#db4437'},
+  product:      {label:'Dev ideas',        icon:'&#9675;', stages:['backlog','planned','in-progress','stalled','done'], color:'#7b5cf0'},
+  inprogress:   {label:'In progress devs', icon:'&#9675;', stages:['backlog','planned','in-progress','stalled','done'], color:'#4a6cf7'},
+  industry:     {label:'Industry data',    icon:'&#9632;', stages:['identified','approached','in-conversation','committed','stalled','closed'], color:'#00bcd4'},
+  contacts:     {label:'Contacts',         icon:'&#9632;', stages:[], color:'#4a6cf7'},
+};
+
+const STAGE_LABELS = {
+  'identified':'Identified','approached':'Approached','in-conversation':'In conversation',
+  'committed':'Committed','stalled':'Stalled','closed':'Closed',
+  'qualifying':'Qualifying','proposal-sent':'Proposal sent','negotiating':'Negotiating',
+  'won':'Won','lost':'Lost',
+  'backlog':'Backlog','planned':'Planned','in-progress':'In progress','done':'Done',
+  'ongoing':'Ongoing','new':'New','progress':'In progress',
+};
+
+Object.keys(SECTIONS).forEach(t => { if(!records[t]) records[t] = []; });
+
+function stageBadge(s){
+  const lbl = STAGE_LABELS[s]||s;
+  return `<span class="stage stage-${s}">${lbl}</span>`;
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(iso){if(!iso)return'';return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+function initials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
+function getDisplayName(u){const f=users.find(x=>x.username===u);return f?f.displayName:u||''}
+
+async function api(payload){
+  if(!SCRIPT_URL) throw new Error('no url');
+  const r = await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)});
+  return r.json();
+}
+
+async function doLogin(){
+  const u = document.getElementById('lu').value.trim();
+  const p = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
+  err.style.display='none';
+  if(!SCRIPT_URL){
+    const url = prompt('Paste your Google Apps Script Web App URL:');
+    if(url&&url.trim()){SCRIPT_URL=url.trim();localStorage.setItem(SCRIPT_URL_KEY,SCRIPT_URL);}
+    else{err.textContent='Script URL required.';err.style.display='block';return;}
+  }
+  try{
+    const res = await api({action:'login',username:u,password:p});
+    if(res.success){
+      currentUser={username:res.username,displayName:res.displayName};
+      dashUser=res.username;
+      sessionStorage.setItem('th2_user',JSON.stringify(currentUser));
+      document.getElementById('user-display').textContent=res.displayName;
+      document.getElementById('login-page').style.display='none';
+      document.getElementById('app').classList.add('show');
+      await loadData();
+      buildMemberRow();
+      renderDashboard();
+    } else {
+      err.textContent=res.error||'Invalid credentials.';
+      err.style.display='block';
+    }
+  } catch(e){
+    err.textContent='Connection error. Check your script URL.';
+    err.style.display='block';
+  }
+}
+
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function doLogout(){
+  sessionStorage.removeItem('th2_user');
+  currentUser=null;
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('app').classList.remove('show');
+}
+
+async function loadData(){
+  try{
+    const res = await api({action:'getAll'});
+    if(res.success){
+      users = res.users||[];
+      activities = res.activities||[];
+      links = res.links||[];
+      Object.keys(SECTIONS).forEach(t=>{ records[t]=res.records&&res.records[t]?res.records[t]:[]; });
+      populateUserSelects();
+    }
+  } catch(e){ console.log('load error',e); }
+}
+
+function populateUserSelects(){
+  const selIds=['rm-assigned','am-assigned','contact-assigned','feed-assigned'];
+  selIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const isFilter=id.includes('contact-')||id.includes('feed-');
+    const cur=el.value;
+    el.innerHTML=isFilter?'<option value="">All team members</option>':'<option value="">Unassigned</option>';
+    users.forEach(u=>{const o=document.createElement('option');o.value=u.username;o.textContent=u.displayName;el.appendChild(o);});
+    if(cur)el.value=cur;
+  });
+  refreshRecordSelect();
+}
+
+function refreshRecordSelect(){
+  const sel=document.getElementById('am-record');
+  if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">-- Not linked --</option>';
+  Object.keys(SECTIONS).forEach(type=>{
+    (records[type]||[]).forEach(r=>{
+      const o=document.createElement('option');
+      o.value=type+'::'+r.id;
+      o.textContent='['+SECTIONS[type].label+'] '+r.name;
+      sel.appendChild(o);
+    });
+  });
+  if(cur)sel.value=cur;
+}
+
+function buildMemberRow(){
+  const row=document.getElementById('member-row');
+  let html='<span>Viewing:</span>';
+  users.forEach(u=>{
+    const isMe=u.username===currentUser.username;
+    const active=u.username===dashUser;
+    html+=`<button class="mbtn${active?' active':''}" onclick="setDashUser('${u.username}')">${u.displayName}${isMe?' (me)':''}</button>`;
+  });
+  row.innerHTML=html;
+}
+
+function setDashUser(u){dashUser=u;buildMemberRow();renderDashboard();}
+
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navEl=document.getElementById('nav-'+name);
+  if(navEl)navEl.classList.add('active');
+  if(name==='dashboard'){buildMemberRow();renderDashboard();}
+  else if(SECTIONS[name]&&name!=='contacts')renderNetworkSection(name);
+  else if(name==='contacts')renderContacts();
+  else if(name==='feed')renderFeed();
+  else if(name==='links')renderLinks();
+}
+
+function renderDashboard(){
+  const v=dashUser||currentUser.username;
+  const vName=getDisplayName(v);
+  const isMe=v===currentUser.username;
+  document.getElementById('dash-label').textContent=isMe?'My recent activity':vName+"'s recent activity";
+
+  const myActs=activities.filter(a=>a.assignedTo===v||a.createdBy===v);
+  const allMyRecords=Object.keys(SECTIONS).flatMap(t=>(records[t]||[]).filter(r=>r.assignedTo===v||r.createdBy===v));
+  const stalledRecords=Object.keys(SECTIONS).flatMap(t=>(records[t]||[]).filter(r=>r.stage==='stalled'));
+  const openActs=myActs.filter(a=>a.status!=='done').length;
+
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat"><div class="n">${allMyRecords.length}</div><div class="l">Assigned records</div></div>
+    <div class="stat"><div class="n">${myActs.length}</div><div class="l">Activities</div></div>
+    <div class="stat warn"><div class="n">${openActs}</div><div class="l">Open activities</div></div>
+    <div class="stat warn"><div class="n">${stalledRecords.length}</div><div class="l">Stalled items</div></div>
+    <div class="stat ok"><div class="n">${myActs.filter(a=>a.status==='done').length}</div><div class="l">Done</div></div>
+  `;
+
+  const feed=document.getElementById('dash-feed');
+  const recent=[...myActs].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
+  if(!recent.length){feed.innerHTML='<div style="color:#bbb;font-size:13px;padding:12px 0">No activities yet.</div>';} 
+  else{
+    feed.innerHTML=recent.map(a=>{
+      const linked=findRecord(a.recordType,a.recordId);
+      return`<div class="dash-feed-item">
+        <div class="dash-feed-dot ${a.status==='done'?'dot-done':a.status==='progress'?'dot-progress':'dot-new'}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px">${esc(a.subject)}</div>
+          ${linked?`<div style="font-size:12px;color:#888;margin-top:2px">${esc(linked.name)} &middot; ${SECTIONS[a.recordType]?SECTIONS[a.recordType].label:''}</div>`:''}
+          ${a.progress?`<div style="font-size:12px;color:#1565c0;margin-top:2px">Next: ${esc(a.progress)}</div>`:''}
+          <div style="font-size:11px;color:#bbb;margin-top:3px">${fmtDate(a.createdAt)}</div>
+        </div>
+        <span class="stage stage-${a.status==='done'?'done':a.status==='progress'?'in-progress':'identified'}" style="font-size:10px">${a.status}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const stalledEl=document.getElementById('dash-stalled');
+  if(!stalledRecords.length){stalledEl.innerHTML='<div style="color:#bbb;font-size:13px;padding:12px 0">No stalled items.</div>';}
+  else{
+    stalledEl.innerHTML=stalledRecords.map(r=>{
+      const type=Object.keys(SECTIONS).find(t=>(records[t]||[]).some(x=>x.id===r.id));
+      return`<div class="dash-feed-item" style="cursor:pointer" onclick="openDetail('${type}','${r.id}')">
+        <div class="dash-feed-dot dot-stalled"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px">${esc(r.name)}</div>
+          <div style="font-size:12px;color:#888">${type?SECTIONS[type].label:''} &middot; ${getDisplayName(r.assignedTo)||'Unassigned'}</div>
+          ${r.notes?`<div style="font-size:12px;color:#666;margin-top:2px">${esc(r.notes).slice(0,80)}${r.notes.length>80?'...':''}</div>`:''}
+        </div>
+        <span class="stage stage-stalled" style="font-size:10px">Stalled</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderNetworkSection(type){
+  const cfg=SECTIONS[type];
+  const el=document.getElementById('section-'+type);
+  const recs=records[type]||[];
+
+  el.innerHTML=`
+    <div class="page-header">
+      <h2>${cfg.label}</h2>
+      <button class="primary" onclick="openRecordModal('${type}')">+ Add</button>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="${type}-search" placeholder="Search..." oninput="filterNetworkSection('${type}')">
+      <select id="${type}-stage-filter" onchange="filterNetworkSection('${type}')">
+        <option value="">All stages</option>
+        ${cfg.stages.map(s=>`<option value="${s}">${STAGE_LABELS[s]||s}</option>`).join('')}
+      </select>
+      <select id="${type}-assigned-filter" onchange="filterNetworkSection('${type}')">
+        <option value="">All team members</option>
+        ${users.map(u=>`<option value="${u.username}">${u.displayName}</option>`).join('')}
+      </select>
+    </div>
+    <div class="grid" id="${type}-grid"></div>
+  `;
+  filterNetworkSection(type);
+}
+
+function filterNetworkSection(type){
+  const q=(document.getElementById(type+'-search')?.value||'').toLowerCase();
+  const sf=document.getElementById(type+'-stage-filter')?.value||'';
+  const af=document.getElementById(type+'-assigned-filter')?.value||'';
+  const recs=(records[type]||[]).filter(r=>{
+    const mq=!q||(r.name||'').toLowerCase().includes(q)||(r.sub||'').toLowerCase().includes(q);
+    const ms=!sf||r.stage===sf;
+    const ma=!af||r.assignedTo===af;
+    return mq&&ms&&ma;
+  });
+  const grid=document.getElementById(type+'-grid');
+  if(!grid)return;
+  if(!recs.length){grid.innerHTML='<div class="empty"><div class="big">&#128203;</div><p>No records yet.</p></div>';return;}
+  grid.innerHTML=recs.map(r=>{
+    const acts=activities.filter(a=>a.recordId===r.id);
+    const open=acts.filter(a=>a.status!=='done').length;
+    return`<div class="card" onclick="openDetail('${type}','${r.id}')">
+      <div class="card-top">
+        <div class="avatar" style="background:${SECTIONS[type].color}15;color:${SECTIONS[type].color}">${initials(r.name)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="card-title">${esc(r.name)}</div>
+          <div class="card-sub">${esc(r.sub||'')}</div>
+        </div>
+      </div>
+      ${r.value?`<div style="font-size:12px;color:#666;margin-bottom:6px">Value: <strong>${esc(r.value)}</strong></div>`:''}
+      <div class="card-footer">
+        ${stageBadge(r.stage||'identified')}
+        ${r.assignedTo?`<span class="assigned-pill">${getDisplayName(r.assignedTo)}</span>`:''}
+        ${acts.length?`<span style="font-size:11px;color:#999">${acts.length} activit${acts.length===1?'y':'ies'}</span>`:''}
+        ${open?`<span style="font-size:11px;color:#e65100">${open} open</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderContacts(){
+  const q=(document.getElementById('contact-search')?.value||'').toLowerCase();
+  const af=document.getElementById('contact-assigned')?.value||'';
+  const recs=(records.contacts||[]).filter(r=>{
+    const mq=!q||(r.name||'').toLowerCase().includes(q)||(r.sub||'').toLowerCase().includes(q)||(r.email||'').toLowerCase().includes(q);
+    const ma=!af||r.assignedTo===af;
+    return mq&&ma;
+  });
+  const grid=document.getElementById('contacts-grid');
+  if(!recs.length){grid.innerHTML='<div class="empty"><div class="big">&#128100;</div><p>No contacts yet.</p></div>';return;}
+  grid.innerHTML=recs.map(r=>{
+    const acts=activities.filter(a=>a.recordId===r.id);
+    const open=acts.filter(a=>a.status!=='done').length;
+    return`<div class="card" onclick="openDetail('contacts','${r.id}')">
+      <div class="card-top">
+        <div class="avatar">${initials(r.name)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="card-title">${esc(r.name)}</div>
+          <div class="card-sub">${esc(r.sub||'')}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#666">${r.email?esc(r.email):''}</div>
+      ${r.phone?`<div style="font-size:12px;color:#666">${esc(r.phone)}</div>`:''}
+      <div class="card-footer">
+        ${r.assignedTo?`<span class="assigned-pill">${getDisplayName(r.assignedTo)}</span>`:''}
+        ${acts.length?`<span style="font-size:11px;color:#999">${acts.length} activit${acts.length===1?'y':'ies'}</span>`:''}
+        ${open?`<span style="font-size:11px;color:#e65100">${open} open</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFeed(){
+  const type=document.getElementById('feed-type')?.value||'';
+  const status=document.getElementById('feed-status')?.value||'';
+  const assigned=document.getElementById('feed-assigned')?.value||'';
+  const filtered=activities.filter(a=>(!type||a.type===type)&&(!status||a.status===status)&&(!assigned||a.assignedTo===assigned))
+    .sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  const list=document.getElementById('feed-list');
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="big">&#128203;</div><p>No activities.</p></div>';return;}
+  list.innerHTML=filtered.map(a=>{
+    const linked=findRecord(a.recordType,a.recordId);
+    return`<div class="feed-item">
+      <div class="feed-header">
+        <span class="type-pill">${a.type||'note'}</span>
+        <strong style="font-size:13px;flex:1">${esc(a.subject)}</strong>
+        <span class="stage stage-${a.status==='done'?'done':a.status==='progress'?'in-progress':'identified'}">${a.status}</span>
+        <button class="sm" onclick="openActivityModal('${a.id}',null,null)">Edit</button>
+        <button class="sm danger" onclick="deleteActivity('${a.id}')">Del</button>
+      </div>
+      ${linked?`<div style="font-size:12px;color:#666;margin-bottom:4px">Linked: <span class="contact-link" onclick="openDetail('${a.recordType}','${a.recordId}')">${esc(linked.name)}</span> (${SECTIONS[a.recordType]?SECTIONS[a.recordType].label:''})</div>`:''}
+      ${a.body?`<div style="font-size:13px;color:#444;margin-bottom:4px">${esc(a.body)}</div>`:''}
+      ${a.progress?`<div style="font-size:12px;color:#1565c0;margin-top:4px">Next: ${esc(a.progress)}</div>`:''}
+      <div style="font-size:11px;color:#bbb;margin-top:6px">${getDisplayName(a.assignedTo)||'Unassigned'} &middot; ${fmtDate(a.createdAt)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLinks(){
+  const q=(document.getElementById('link-search')?.value||'').toLowerCase();
+  const cf=document.getElementById('link-cat-filter')?.value||'';
+  const filtered=(links||[]).filter(l=>(!q||(l.title||'').toLowerCase().includes(q)||(l.notes||'').toLowerCase().includes(q))&&(!cf||l.category===cf));
+  const list=document.getElementById('links-list');
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="big">&#128279;</div><p>No shared links yet.</p></div>';return;}
+  list.innerHTML=filtered.map(l=>`
+    <div class="link-card">
+      <div class="link-icon">${(l.category||'?')[0]}</div>
+      <div style="flex:1;min-width:0">
+        <div class="link-title">${esc(l.title)}</div>
+        <a class="link-url" href="${esc(l.url)}" target="_blank">${esc(l.url)}</a>
+        ${l.notes?`<div class="link-notes">${esc(l.notes)}</div>`:''}
+        <div class="link-meta">${l.category||''} &middot; Shared by ${getDisplayName(l.sharedBy)||l.sharedBy||'Unknown'} &middot; ${fmtDate(l.createdAt)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="sm" onclick="openLinkModal('${l.id}')">Edit</button>
+        <button class="sm danger" onclick="deleteLink('${l.id}')">Del</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function findRecord(type,id){
+  if(!type||!id)return null;
+  return (records[type]||[]).find(r=>r.id===id)||null;
+}
+
+function openDetail(type,id){
+  openRecordId=id;openRecordType=type;
+  const r=findRecord(type,id);
+  if(!r)return;
+  const cfg=SECTIONS[type];
+  const acts=activities.filter(a=>a.recordId===id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  let html=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="avatar" style="width:48px;height:48px;font-size:16px;background:${cfg.color}15;color:${cfg.color}">${initials(r.name)}</div>
+      <div>
+        <div style="font-size:18px;font-weight:700">${esc(r.name)}</div>
+        <div style="font-size:13px;color:#888">${esc(r.sub||'')} ${r.assignedTo?'&middot; '+getDisplayName(r.assignedTo):''}</div>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button onclick="openRecordModal('${type}','${id}')">Edit</button>
+      <button class="primary" onclick="openActivityModal(null,'${type}','${id}')">+ Log activity</button>
+      <button class="danger sm" style="margin-left:auto" onclick="deleteRecord('${type}','${id}')">Delete</button>
+    </div>
+    <div class="info-grid">
+      ${cfg.stages.length?`<span class="lbl">Stage</span><span class="val">${stageBadge(r.stage||'identified')}</span>`:''}
+      ${r.email?`<span class="lbl">Email</span><span class="val"><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></span>`:''}
+      ${r.phone?`<span class="lbl">Phone</span><span class="val">${esc(r.phone)}</span>`:''}
+      ${r.address?`<span class="lbl">Address</span><span class="val">${esc(r.address)}</span>`:''}
+      ${r.value?`<span class="lbl">Value</span><span class="val"><strong>${esc(r.value)}</strong></span>`:''}
+    </div>
+    ${r.notes?`<div class="notes-box">${esc(r.notes)}</div>`:''}
+    <div style="font-size:13px;font-weight:600;color:#444;margin-bottom:10px">Activities (${acts.length})</div>
+  `;
+  html+=acts.length?acts.map(a=>`
+    <div class="activity-item">
+      <div class="act-header">
+        <span class="type-pill">${a.type||'note'}</span>
+        <span class="act-subject">${esc(a.subject)}</span>
+        <span class="stage stage-${a.status==='done'?'done':a.status==='progress'?'in-progress':'identified'}">${a.status}</span>
+      </div>
+      ${a.body?`<div style="font-size:13px;color:#444;white-space:pre-wrap">${esc(a.body)}</div>`:''}
+      ${a.progress?`<div style="font-size:12px;color:#1565c0;margin-top:4px">Next: ${esc(a.progress)}</div>`:''}
+      <div class="act-footer">
+        <span>${getDisplayName(a.assignedTo)||'Unassigned'} &middot; ${fmtDate(a.createdAt)}</span>
+        <div class="act-actions">
+          <button class="sm" onclick="openActivityModal('${a.id}',null,null)">Edit</button>
+          <button class="sm danger" onclick="deleteActivity('${a.id}')">Del</button>
+        </div>
+      </div>
+    </div>
+  `).join(''):'<div style="color:#bbb;font-size:13px">No activities logged yet.</div>';
+
+  document.getElementById('panel-content').innerHTML=html;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function closePanel(){document.getElementById('detail-overlay').classList.remove('open');openRecordId=null;openRecordType=null;}
+function maybeCloseOverlay(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+
+function openRecordModal(type,id){
+  const cfg=SECTIONS[type];
+  document.getElementById('rm-title').textContent=(id?'Edit ':'Add ')+cfg.label;
+  document.getElementById('rm-type').value=type;
+  document.getElementById('rm-id').value='';
+  document.getElementById('rm-sub-label').textContent=type==='contacts'?'Company':'Organisation / Company';
+  document.getElementById('rm-address-row').style.display=type==='contacts'?'block':'none';
+  ['name','sub','email','phone','address','notes','value'].forEach(f=>document.getElementById('rm-'+f).value='');
+  document.getElementById('rm-assigned').value='';
+  const stageEl=document.getElementById('rm-stage');
+  stageEl.innerHTML=cfg.stages.length?cfg.stages.map(s=>`<option value="${s}">${STAGE_LABELS[s]||s}</option>`).join(''):'<option value="">N/A</option>';
+  if(id){
+    const r=findRecord(type,id);
+    if(r){
+      document.getElementById('rm-id').value=r.id;
+      document.getElementById('rm-name').value=r.name||'';
+      document.getElementById('rm-sub').value=r.sub||'';
+      document.getElementById('rm-email').value=r.email||'';
+      document.getElementById('rm-phone').value=r.phone||'';
+      document.getElementById('rm-address').value=r.address||'';
+      document.getElementById('rm-notes').value=r.notes||'';
+      document.getElementById('rm-value').value=r.value||'';
+      document.getElementById('rm-assigned').value=r.assignedTo||'';
+      stageEl.value=r.stage||cfg.stages[0]||'';
+    }
+  }
+  document.getElementById('record-modal').classList.add('open');
+}
+function closeRecordModal(){document.getElementById('record-modal').classList.remove('open');}
+
+async function saveRecord(){
+  const name=document.getElementById('rm-name').value.trim();
+  if(!name){alert('Name is required.');return;}
+  const type=document.getElementById('rm-type').value;
+  const id=document.getElementById('rm-id').value;
+  const r={
+    id:id||null,name,sub:document.getElementById('rm-sub').value.trim(),
+    email:document.getElementById('rm-email').value.trim(),
+    phone:document.getElementById('rm-phone').value.trim(),
+    address:document.getElementById('rm-address').value.trim(),
+    notes:document.getElementById('rm-notes').value.trim(),
+    value:document.getElementById('rm-value').value.trim(),
+    stage:document.getElementById('rm-stage').value,
+    assignedTo:document.getElementById('rm-assigned').value,
+    createdBy:currentUser.username,type
+  };
+  try{
+    const res=await api({action:'saveRecord',record:r,recordType:type});
+    if(res.success){
+      if(id){records[type]=records[type].map(x=>x.id===id?res.record:x);}
+      else{if(!records[type])records[type]=[];records[type].push(res.record);}
+      closeRecordModal();
+      refreshRecordSelect();
+      if(SECTIONS[type]&&type!=='contacts')renderNetworkSection(type);
+      else renderContacts();
+      renderDashboard();
+      if(openRecordId===id&&openRecordType===type)openDetail(type,id);
+    } else alert('Error: '+res.error);
+  } catch(e){alert('Connection error.');}
+}
+
+async function deleteRecord(type,id){
+  if(!confirm('Delete this record and all its activities?'))return;
+  try{
+    const res=await api({action:'deleteRecord',id,recordType:type});
+    if(res.success){
+      records[type]=(records[type]||[]).filter(r=>r.id!==id);
+      activities=activities.filter(a=>a.recordId!==id);
+      closePanel();
+      if(SECTIONS[type]&&type!=='contacts')renderNetworkSection(type);
+      else renderContacts();
+      renderDashboard();
+    }
+  } catch(e){alert('Connection error.');}
+}
+
+function openActivityModal(actId,recordType,recordId){
+  document.getElementById('am-title').textContent=actId?'Edit activity':'Log activity';
+  document.getElementById('am-id').value='';
+  document.getElementById('am-type').value='note';
+  document.getElementById('am-status').value='new';
+  document.getElementById('am-subject').value='';
+  document.getElementById('am-body').value='';
+  document.getElementById('am-progress').value='';
+  document.getElementById('am-assigned').value=currentUser?currentUser.username:'';
+  refreshRecordSelect();
+  document.getElementById('am-record').value=recordType&&recordId?recordType+'::'+recordId:'';
+  if(actId){
+    const a=activities.find(x=>x.id===actId);
+    if(a){
+      document.getElementById('am-id').value=a.id;
+      document.getElementById('am-type').value=a.type||'note';
+      document.getElementById('am-status').value=a.status||'new';
+      document.getElementById('am-subject').value=a.subject||'';
+      document.getElementById('am-body').value=a.body||'';
+      document.getElementById('am-progress').value=a.progress||'';
+      document.getElementById('am-assigned').value=a.assignedTo||'';
+      document.getElementById('am-record').value=a.recordType&&a.recordId?a.recordType+'::'+a.recordId:'';
+    }
+  }
+  document.getElementById('activity-modal').classList.add('open');
+}
+function closeActivityModal(){document.getElementById('activity-modal').classList.remove('open');}
+
+async function saveActivity(){
+  const subject=document.getElementById('am-subject').value.trim();
+  if(!subject){alert('Subject is required.');return;}
+  const id=document.getElementById('am-id').value;
+  const recordVal=document.getElementById('am-record').value;
+  const [rtype,rid]=recordVal?recordVal.split('::'):['',''];
+  const a={
+    id:id||null,type:document.getElementById('am-type').value,
+    status:document.getElementById('am-status').value,
+    recordType:rtype||'',recordId:rid||'',subject,
+    body:document.getElementById('am-body').value.trim(),
+    progress:document.getElementById('am-progress').value.trim(),
+    assignedTo:document.getElementById('am-assigned').value,
+    createdBy:currentUser.username
+  };
+  try{
+    const res=await api({action:'saveActivity',activity:a});
+    if(res.success){
+      if(id){activities=activities.map(x=>x.id===id?res.activity:x);}
+      else{activities.unshift(res.activity);}
+      closeActivityModal();
+      renderFeed();renderDashboard();
+      if(openRecordId)openDetail(openRecordType,openRecordId);
+      if(SECTIONS[openRecordType]&&openRecordType!=='contacts')filterNetworkSection(openRecordType);
+    } else alert('Error: '+res.error);
+  } catch(e){alert('Connection error.');}
+}
+
+async function deleteActivity(id){
+  if(!confirm('Delete this activity?'))return;
+  try{
+    const res=await api({action:'deleteActivity',id});
+    if(res.success){
+      activities=activities.filter(a=>a.id!==id);
+      renderFeed();renderDashboard();
+      if(openRecordId)openDetail(openRecordType,openRecordId);
+    }
+  } catch(e){alert('Connection error.');}
+}
+
+function openLinkModal(id){
+  document.getElementById('lm-title').textContent=id?'Edit link':'Add shared link';
+  document.getElementById('lm-id').value='';
+  document.getElementById('lm-url').value='';
+  document.getElementById('lm-title-field').value='';
+  document.getElementById('lm-cat').value='Article';
+  document.getElementById('lm-notes').value='';
+  if(id){
+    const l=(links||[]).find(x=>x.id===id);
+    if(l){
+      document.getElementById('lm-id').value=l.id;
+      document.getElementById('lm-url').value=l.url||'';
+      document.getElementById('lm-title-field').value=l.title||'';
+      document.getElementById('lm-cat').value=l.category||'Article';
+      document.getElementById('lm-notes').value=l.notes||'';
+    }
+  }
+  document.getElementById('link-modal').classList.add('open');
+}
+function closeLinkModal(){document.getElementById('link-modal').classList.remove('open');}
+
+async function saveLink(){
+  const url=document.getElementById('lm-url').value.trim();
+  const title=document.getElementById('lm-title-field').value.trim();
+  if(!url||!title){alert('URL and title are required.');return;}
+  const id=document.getElementById('lm-id').value;
+  const l={id:id||null,url,title,category:document.getElementById('lm-cat').value,notes:document.getElementById('lm-notes').value.trim(),sharedBy:currentUser.username};
+  try{
+    const res=await api({action:'saveLink',link:l});
+    if(res.success){
+      if(id){links=links.map(x=>x.id===id?res.link:x);}else{if(!links)links=[];links.unshift(res.link);}
+      closeLinkModal();renderLinks();
+    } else alert('Error: '+res.error);
+  } catch(e){alert('Connection error.');}
+}
+
+async function deleteLink(id){
+  if(!confirm('Delete this link?'))return;
+  try{
+    const res=await api({action:'deleteLink',id});
+    if(res.success){links=links.filter(l=>l.id!==id);renderLinks();}
+  } catch(e){alert('Connection error.');}
+}
+
+const saved=sessionStorage.getItem('th2_user');
+if(saved){
+  currentUser=JSON.parse(saved);
+  dashUser=currentUser.username;
+  document.getElementById('user-display').textContent=currentUser.displayName;
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app').classList.add('show');
+  loadData().then(()=>{buildMemberRow();renderDashboard();});
+}
+</script>
+</body>
+</html>
